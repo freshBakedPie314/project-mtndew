@@ -12,21 +12,28 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExpenseDTO {
+
+    public enum SplitType {
+        EQUAL, PERCENTAGE, OCR
+    }
+
     private UUID id;
+    private UUID groupId;
+    private UUID paidBy;
+    private float amount;
     private String description;
     private LocalDateTime addedAt;
-    private float amount;
-    private UUID paidBy;
-    private UUID groupId;
+    private SplitType splitType;
+    private Float subtotal;
+
+    private List<ExpenseSplitDTO> splits;
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ExpenseSplitDTO {
         private UUID id;
-        private String username;
+        private Float percent; // PERCENTAGE split only
         private Float amount;
     }
-
-    private List<ExpenseSplitDTO> splits;
 }

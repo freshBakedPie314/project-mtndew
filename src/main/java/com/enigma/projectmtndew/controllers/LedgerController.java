@@ -1,11 +1,13 @@
 package com.enigma.projectmtndew.controllers;
 
 import com.enigma.projectmtndew.dtos.ExpenseDTO;
+import com.enigma.projectmtndew.dtos.ScannedReceiptExpenseRequestDTO;
 import com.enigma.projectmtndew.dtos.SettlementDTO;
 import com.enigma.projectmtndew.dtos.SettlementRequestDTO;
 import com.enigma.projectmtndew.entities.NetBalanceId;
 import com.enigma.projectmtndew.entities.SimplifiedDebts;
 import com.enigma.projectmtndew.services.LedgerService;
+import com.enigma.projectmtndew.services.OcrService;
 import com.enigma.projectmtndew.services.SettlementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,9 @@ public class LedgerController {
     LedgerService ledgerService;
 
     @Autowired
+    OcrService ocrService;
+
+    @Autowired
     SettlementService settlementService;
 
     @PostMapping("/add")
@@ -34,6 +39,14 @@ public class LedgerController {
         ExpenseDTO expense = ledgerService.addExpense(expenseDTO);
         return ResponseEntity.ok(expense);
     }
+
+    @PostMapping("/add/scanned")
+    public ResponseEntity<ExpenseDTO> addScannedExpense(@AuthenticationPrincipal Jwt jwt, @RequestBody ScannedReceiptExpenseRequestDTO request) {
+        request.setPaidBy(UUID.fromString(jwt.getSubject()));
+        ExpenseDTO expenseDTO = ocrService.handleScannedReceiptExpenseRequest(request);
+        return ResponseEntity.ok(ledgerService.addExpense(expenseDTO));
+    }
+
 
     @GetMapping("/raw/{groupId}")
     public ResponseEntity<List<ExpenseDTO>> getExpense(@PathVariable("groupId") String groupId) {
