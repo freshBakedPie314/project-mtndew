@@ -31,14 +31,20 @@ public class UserService {
     private NetBalanceRepository netBalanceRepository;
 
 
-    public UserDTO saveUser(UUID id,String emai, String username) {
-        User user = new User();
-        user.setId(id);
-        user.setEmail(emai);
-        user.setUsername(username);
-
-        User savedUser = userRepository.save(user);
-        return toDTO(savedUser);
+    public UserDTO syncUser(UUID id, String email, String username) {
+        return userRepository.findById(id)
+                .map(existingUser -> {
+                    existingUser.setEmail(email);
+                    existingUser.setUsername(username);
+                    return toDTO(userRepository.save(existingUser));
+                })
+                .orElseGet(() -> {
+                    User newUser = new User();
+                    newUser.setId(id);
+                    newUser.setEmail(email);
+                    newUser.setUsername(username);
+                    return toDTO(userRepository.save(newUser));
+                });
     }
 
     public UserDTO getUser(UUID id) {
@@ -98,6 +104,7 @@ public class UserService {
 
     public UserDTO toDTO(User user) {
         UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
         userDTO.setUsername(user.getUsername());
         userDTO.setEmail(user.getEmail());
         return userDTO;

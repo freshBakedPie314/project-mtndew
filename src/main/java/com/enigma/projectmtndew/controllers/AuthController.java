@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.net.http.HttpResponse;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -25,13 +26,25 @@ public class AuthController {
 
     @PostMapping("/sync")
     public ResponseEntity<UserDTO> sync(@AuthenticationPrincipal Jwt jwt) {
-        UUID userId = UUID.fromString((jwt.getSubject()));
+        // Safely extract the subject UUID (Google/Supabase user ID)
+        UUID userId = UUID.fromString(jwt.getSubject());
 
-        String email =  jwt.getClaims().get("email").toString();
-        String username = jwt.getClaims().get("username").toString();
+        // Safely fall back if claims are nested or named differently
+        String email = jwt.getClaimAsString("email");
 
-        UserDTO createdUser = userService.saveUser(userId, email, username);
+        // Google standard JWT maps full name to "name" instead of "username"
+        String username = jwt.getClaimAsString("name");
+        if (username == null && jwt.getClaim("user_metadata") != null) {
+            Map<String, Object> userMetadata = jwt.getClaim("user_metadata");
+            username = userMetadata.getOrDefault("username", userMetadata.getOrDefault("name", "New User")).toString();
+        }
+        if (username == null) {
+            username = "User_" + userId.toString().substring(0, 6);
+        }
 
-        return ResponseEntity.ok(createdUser);
+        // Sync the account (Create if absent, otherwise update/retrieve)
+        UserDTO synchronizedUser = userService.syncUser(userId, email, username);
+
+        return ResponseEntity.ok(synchronizedUser);
     }
 }
