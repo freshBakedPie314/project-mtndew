@@ -37,6 +37,13 @@ public class GroupController {
         return ResponseEntity.ok(group);
     }
 
+    @PostMapping("/join")
+    public ResponseEntity<GroupDTO> join(@AuthenticationPrincipal Jwt jwt, @RequestParam String inviteCode){
+        UUID requesterId =  UUID.fromString(jwt.getSubject());
+        GroupDTO group = groupService.joinGroup(requesterId, inviteCode);
+        return ResponseEntity.ok(group);
+    }
+
     @GetMapping("/{groupId}")
     public ResponseEntity<GroupDetailedDTO> getGroup(@AuthenticationPrincipal Jwt jwt, @PathVariable String groupId){
         UUID requesterId = UUID.fromString(jwt.getSubject());

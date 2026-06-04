@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface GroupRepository extends JpaRepository<Group, UUID> {
     Optional<Group> findById(UUID id);
     List<Group> findAllByIdIn(List<UUID> ids);
+
+    UUID findByInviteCode(String inviteCode);
 }

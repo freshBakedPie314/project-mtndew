@@ -62,6 +62,19 @@ public class GroupService {
         return toGroupDTO(group);
     }
 
+    public GroupDTO joinGroup(UUID requesterId, String inviteCode) {
+        UUID groupId = groupRepository.findByInviteCode(inviteCode);
+        if(groupMemebrRepository.existsByIdGroupIdAndIdUserId(groupId, requesterId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Already part of group");
+        }
+        GroupMember newMember = GroupMember.builder()
+                                .id(new GroupMemberId(groupId, requesterId))
+                                .build();
+        groupMemebrRepository.save(newMember);
+        Group group = groupRepository.findById(groupId).orElse(null);
+        return toGroupDTO(group);
+    }
+
     public GroupDetailedDTO getGroup(UUID requesterId, UUID groupId) {
 
         if(!groupMemebrRepository.existsById(new GroupMemberId(groupId, requesterId)))

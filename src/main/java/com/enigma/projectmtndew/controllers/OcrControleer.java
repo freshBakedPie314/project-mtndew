@@ -3,6 +3,7 @@ package com.enigma.projectmtndew.controllers;
 import com.enigma.projectmtndew.dtos.OcrReceiptResponseDTO;
 import com.enigma.projectmtndew.services.OcrService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,8 +21,8 @@ public class OcrControleer {
 //        return ResponseEntity.ok(response);
 //    }
 
-    @PostMapping("/scan")
-    public ResponseEntity<OcrReceiptResponseDTO> ask(@RequestParam("image") MultipartFile image) throws Exception {
+    @PostMapping(path = "/scan", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<OcrReceiptResponseDTO> scan(@RequestParam("image") MultipartFile image) throws Exception {
         OcrReceiptResponseDTO response = geminiService.scanImage(image);
         return ResponseEntity.ok(response);
     }

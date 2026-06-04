@@ -1,11 +1,7 @@
 package com.enigma.projectmtndew.controllers;
 
-import com.enigma.projectmtndew.dtos.ExpenseDTO;
-import com.enigma.projectmtndew.dtos.ScannedReceiptExpenseRequestDTO;
-import com.enigma.projectmtndew.dtos.SettlementDTO;
-import com.enigma.projectmtndew.dtos.SettlementRequestDTO;
+import com.enigma.projectmtndew.dtos.*;
 import com.enigma.projectmtndew.entities.NetBalanceId;
-import com.enigma.projectmtndew.entities.SimplifiedDebts;
 import com.enigma.projectmtndew.services.LedgerService;
 import com.enigma.projectmtndew.services.OcrService;
 import com.enigma.projectmtndew.services.SettlementService;
@@ -15,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -54,6 +49,20 @@ public class LedgerController {
 
         List<ExpenseDTO> exoenses = ledgerService.getExpenseByGroupId(uuid);
         return ResponseEntity.ok(exoenses);
+    }
+
+    @GetMapping("/simplified/{groupId}")
+    public ResponseEntity<List<SimplifiedDebtResponseDTO>> getSimplifiedDebts(@PathVariable("groupId") String groupId) {
+        UUID uuid = UUID.fromString(groupId);
+        List<SimplifiedDebtResponseDTO> dto = ledgerService.getSimplifiedDebtByGroupId(uuid);
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("balances/{groupId}")
+    public ResponseEntity<List<NetBalanceDebtResponseDTO>> getNetBalanceDebts(@PathVariable("groupId") String groupId) {
+        UUID uuid = UUID.fromString(groupId);
+        List<NetBalanceDebtResponseDTO> dto = ledgerService.getNetBalancesByGroupId(uuid);
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping("/settle")

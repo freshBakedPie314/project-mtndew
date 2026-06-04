@@ -2,11 +2,14 @@ package com.enigma.projectmtndew.services;
 
 import com.enigma.projectmtndew.dtos.GroupDTO;
 import com.enigma.projectmtndew.dtos.UserDTO;
+import com.enigma.projectmtndew.dtos.UserExpenseSummaryResponseDTO;
 import com.enigma.projectmtndew.entities.Group;
 import com.enigma.projectmtndew.entities.GroupMember;
+import com.enigma.projectmtndew.entities.NetBalance;
 import com.enigma.projectmtndew.entities.User;
 import com.enigma.projectmtndew.repos.GroupMemebrRepository;
 import com.enigma.projectmtndew.repos.GroupRepository;
+import com.enigma.projectmtndew.repos.NetBalanceRepository;
 import com.enigma.projectmtndew.repos.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,10 @@ public class UserService {
 
     @Autowired
     private GroupMemebrRepository groupMemebrRepository;
+
+    @Autowired
+    private NetBalanceRepository netBalanceRepository;
+
 
     public UserDTO saveUser(UUID id,String emai, String username) {
         User user = new User();
@@ -55,6 +62,30 @@ public class UserService {
                 toDTO(user))
                 .toList();
     }
+
+    public UserExpenseSummaryResponseDTO getUserExpenseSummary(UUID id) {
+
+        //get all owed -> fromUserId = id
+        float amountOwed = 0;
+        List<NetBalance> netBalancesOwed = netBalanceRepository.findAllByIdFromUser(id);
+        for (NetBalance netBalance : netBalancesOwed) {
+            amountOwed += netBalance.getAmount();
+        }
+
+        //get all lent -> toUserId = id
+        float amountLent = 0;
+        List<NetBalance> netBalancesLent = netBalanceRepository.findAllByIdToUser(id);
+        for (NetBalance netBalance : netBalancesLent) {
+            amountLent += netBalance.getAmount();
+        }
+
+        UserExpenseSummaryResponseDTO responseDTO = new UserExpenseSummaryResponseDTO();
+        responseDTO.setTotalLent(amountLent);
+        responseDTO.setTotalOwed(amountOwed);
+        return responseDTO;
+    }
+
+
     //=======HELPERS========
 
 

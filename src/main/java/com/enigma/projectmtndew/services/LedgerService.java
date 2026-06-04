@@ -1,10 +1,14 @@
 package com.enigma.projectmtndew.services;
 
 import com.enigma.projectmtndew.dtos.ExpenseDTO;
+import com.enigma.projectmtndew.dtos.NetBalanceDebtResponseDTO;
+import com.enigma.projectmtndew.dtos.SimplifiedDebtResponseDTO;
 import com.enigma.projectmtndew.entities.Expense;
 import com.enigma.projectmtndew.entities.ExpenseSplit;
 import com.enigma.projectmtndew.repos.ExpenseRepository;
 import com.enigma.projectmtndew.repos.ExpenseSplitRepository;
+import com.enigma.projectmtndew.repos.NetBalanceRepository;
+import com.enigma.projectmtndew.repos.SimplifiedDebtsRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +29,12 @@ public class LedgerService {
 
     @Autowired
     private ExpenseSplitRepository expenseSplitRepository;
+
+    @Autowired
+    private SimplifiedDebtsRepository simplifiedDebtsRepository;
+
+    @Autowired
+    private NetBalanceRepository netBalanceRepository;
 
     @Transactional
     public ExpenseDTO addExpense(ExpenseDTO expenseDTO) {
@@ -143,6 +153,34 @@ public class LedgerService {
     public List<ExpenseDTO> getExpenseByGroupId(UUID groupId) {
         return expenseRepository.getAllByGroupId(groupId).stream()
                 .map(this::toDTORaw)
+                .toList();
+    }
+
+    public List<SimplifiedDebtResponseDTO> getSimplifiedDebtByGroupId(UUID groupId) {
+        return simplifiedDebtsRepository.getAllByGroupId(groupId).stream()
+                .map( debt ->
+                        {
+                                SimplifiedDebtResponseDTO dto = new SimplifiedDebtResponseDTO();
+                                dto.setFromUserId(debt.getFromUserId());
+                                dto.setToUserId(debt.getToUserId());
+                                dto.setAmount(debt.getAmount());
+                                return dto;
+                        }
+                )
+                .toList();
+    }
+
+    public List<NetBalanceDebtResponseDTO> getNetBalancesByGroupId(UUID groupId) {
+        return netBalanceRepository.findByIdGroupId(groupId).stream()
+                .map( debt ->
+                        {
+                            NetBalanceDebtResponseDTO dto = new NetBalanceDebtResponseDTO();
+                            dto.setFromUserId(debt.getId().getFromUser());
+                            dto.setToUserId(debt.getId().getToUser());
+                            dto.setAmount(debt.getAmount());
+                            return dto;
+                        }
+                )
                 .toList();
     }
 }
