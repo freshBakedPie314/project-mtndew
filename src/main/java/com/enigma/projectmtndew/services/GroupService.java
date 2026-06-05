@@ -82,13 +82,17 @@ public class GroupService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User not part of group");
         }
 
-        Group group = groupRepository.findById(groupId).orElse(null);
+        Group group = groupRepository.findById(groupId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Group not found"
+        ));
+
         GroupDetailedDTO groupDetailedDTO = new GroupDetailedDTO();
         groupDetailedDTO.setGroupName(group.getName());
         groupDetailedDTO.setCurrency(group.getCurrency());
         groupDetailedDTO.setInviteCode(group.getInviteCode());
         groupDetailedDTO.setCreatedAt(group.getCreatedAt());
         groupDetailedDTO.setCreatedBy(group.getCreatedBy());
+        groupDetailedDTO.setGroupId(groupId);
 
         groupDetailedDTO.setGroupMembers(
                 userService.getUsersInAGroup(groupId).stream()
