@@ -64,6 +64,9 @@ public class GroupService {
 
     public GroupDTO joinGroup(UUID requesterId, String inviteCode) {
         UUID groupId = groupRepository.findByInviteCode(inviteCode);
+        if(groupId == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid invite code");
+        }
         if(groupMemebrRepository.existsByIdGroupIdAndIdUserId(groupId, requesterId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Already part of group");
         }
@@ -127,7 +130,11 @@ public class GroupService {
         group.setCreatedBy(creatorId);
 
         Group savedGroup = groupRepository.save(group);
-        return toGroupDTO(group);
+        GroupMember newMember = GroupMember.builder()
+                .id(new GroupMemberId(savedGroup.getId(), creatorId))
+                .build();
+        groupMemebrRepository.save(newMember);
+        return toGroupDTO(savedGroup);
     }
 
 }
