@@ -63,10 +63,14 @@ public class GroupService {
     }
 
     public GroupDTO joinGroup(UUID requesterId, String inviteCode) {
-        UUID groupId = groupRepository.findByInviteCode(inviteCode);
-        if(groupId == null) {
+        inviteCode = inviteCode.trim();
+        inviteCode = inviteCode.toUpperCase();
+        Group groupToJoin = groupRepository.findByInviteCode(inviteCode);
+        if(groupToJoin == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid invite code");
         }
+
+        UUID groupId = groupToJoin.getId();
         if(groupMemebrRepository.existsByIdGroupIdAndIdUserId(groupId, requesterId)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Already part of group");
         }
