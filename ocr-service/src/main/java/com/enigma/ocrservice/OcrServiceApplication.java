@@ -1,13 +1,13 @@
-package com.enigma.projectmtndew;
+package com.enigma.ocrservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ProjectMtndewApplication {
+public class OcrServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ProjectMtndewApplication.class, args);
+        SpringApplication.run(OcrServiceApplication.class, args);
     }
 
 }
